@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..modules import Conv
 
-__all__ = ['PPA', 'DASI']
+__all__ = ['PPA', 'MRFN']
 
 class SpatialAttentionModule(nn.Module):
     def __init__(self):
@@ -120,7 +120,7 @@ class Bag(nn.Module):
         edge_att = torch.sigmoid(d)
         return edge_att * p + (1 - edge_att) * i
 
-class DASI(nn.Module):
+class MRFN(nn.Module):
     def __init__(self, in_features, out_features) -> None:
          super().__init__()
          self.bag = Bag()

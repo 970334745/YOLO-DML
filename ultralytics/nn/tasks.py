@@ -107,7 +107,7 @@ except ImportError:
     thop = None
 
 DETECT_CLASS = (Detect, Detect_DyHead, Detect_AFPN_P2345, Detect_AFPN_P2345_Custom, Detect_AFPN_P345, Detect_AFPN_P345_Custom, Detect_Efficient, DetectAux, Detect_SEAM, Detect_MultiSEAM, 
-                Detect_DyHeadWithDCNV3, Detect_DyHeadWithDCNV4, Detect_DyHead_Prune, Detect_LSCD, Detect_TADDH, Detect_LADH, Detect_LSCSBD, Detect_LSDECD)
+                Detect_DyHeadWithDCNV3, Detect_DyHeadWithDCNV4, Detect_DyHead_Prune, Detect_LSCD, LATAN, Detect_LADH, Detect_LSCSBD, Detect_LSDECD)
 V10_DETECT_CLASS = (v10Detect, Detect_NMSFree, v10Detect_LSCD)
 SEGMENT_CLASS = (Segment, Segment_Efficient, Segment_LSCD, Segment_TADDH, Segment_LADH, Segment_LSCSBD, Segment_LSDECD)
 POSE_CLASS = (Pose, Pose_LSCD, Pose_TADDH, Pose_LADH, Pose_LSCSBD, Pose_LSDECD)
@@ -1030,7 +1030,7 @@ def parse_model(d, ch, verbose=True, warehouse_manager=None):  # model_dict, inp
             C3_DynamicConv, C2f_DynamicConv, C3_GhostDynamicConv, C2f_GhostDynamicConv, C3_RVB, C2f_RVB, C3_RVB_SE, C2f_RVB_SE, C3_RVB_EMA, C2f_RVB_EMA, DGCST,
             C3_RetBlock, C2f_RetBlock, C3_PKIModule, C2f_PKIModule, RepNCSPELAN4_CAA, C3_FADC, C2f_FADC, C3_PPA, C2f_PPA, SRFD, DRFD, RGCSPELAN,
             C3_Faster_CGLU, C2f_Faster_CGLU, C3_Star, C2f_Star, C3_Star_CAA, C2f_Star_CAA, C3_KAN, C2f_KAN, C3_EIEM, C2f_EIEM, C3_DEConv, C2f_DEConv,
-            C3_SMPCGLU, C2f_SMPCGLU, C3_Heat, C2f_Heat, CSP_PTB, SimpleStem, VisionClueMerge, VSSBlock_YOLO, XSSBlock, GLSA, C2f_WTConv, WTConv2d, FeaturePyramidSharedConv,
+            C3_SMPCGLU, DPS_CGLU, C3_Heat, C2f_Heat, CSP_PTB, SimpleStem, VisionClueMerge, VSSBlock_YOLO, XSSBlock, GLSA, C2f_WTConv, WTConv2d, FeaturePyramidSharedConv,
             C2f_FMB, LDConv, C2f_gConv, C2f_WDBB, C2f_DeepDBB, C2f_AdditiveBlock, C2f_AdditiveBlock_CGLU, CSP_MSCB, C2f_MSMHSA_CGLU, CSP_PMSFA
         }:
             if args[0] == 'head_channel':
@@ -1068,7 +1068,7 @@ def parse_model(d, ch, verbose=True, warehouse_manager=None):  # model_dict, inp
                      C3_VSS, C2f_VSS, C3_LVMB, C2f_LVMB, C3_DynamicConv, C2f_DynamicConv, C3_GhostDynamicConv, C2f_GhostDynamicConv,
                      C3_RVB, C2f_RVB, C3_RVB_SE, C2f_RVB_SE, C3_RVB_EMA, C2f_RVB_EMA, C3_RetBlock, C2f_RetBlock, C3_PKIModule, C2f_PKIModule,
                      C3_FADC, C2f_FADC, C3_PPA, C2f_PPA, RGCSPELAN, C3_Faster_CGLU, C2f_Faster_CGLU, C3_Star, C2f_Star, C3_Star_CAA, C2f_Star_CAA,
-                     C3_KAN, C2f_KAN, C3_EIEM, C2f_EIEM, C3_DEConv, C2f_DEConv, C3_SMPCGLU, C2f_SMPCGLU, C3_Heat, C2f_Heat, CSP_PTB, XSSBlock, C2f_WTConv,
+                     C3_KAN, C2f_KAN, C3_EIEM, C2f_EIEM, C3_DEConv, C2f_DEConv, C3_SMPCGLU, DPS_CGLU, C3_Heat, C2f_Heat, CSP_PTB, XSSBlock, C2f_WTConv,
                      C2f_FMB, C2f_gConv, C2f_WDBB, C2f_DeepDBB, C2f_AdditiveBlock, C2f_AdditiveBlock_CGLU, CSP_MSCB, C2f_MSMHSA_CGLU, CSP_PMSFA
                      }:
                 args.insert(2, n)  # number of repeats
@@ -1097,7 +1097,7 @@ def parse_model(d, ch, verbose=True, warehouse_manager=None):  # model_dict, inp
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
                 if m in (Segment_LSCD, Segment_TADDH, Segment_LSCSBD, Segment_LSDECD):
                     args[3] = make_divisible(min(args[3], max_channels) * width, 8)
-            if m in (Detect_LSCD, Detect_TADDH, Detect_LSCSBD, Detect_LSDECD, v10Detect_LSCD):
+            if m in (Detect_LSCD, LATAN, Detect_LSCSBD, Detect_LSDECD, v10Detect_LSCD):
                 args[1] = make_divisible(min(args[1], max_channels) * width, 8)
             if m in (Pose_LSCD, Pose_TADDH, Pose_LSCSBD, Pose_LSDECD, OBB_LSCD, OBB_TADDH, OBB_LSCSBD, OBB_LSDECD):
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
@@ -1202,7 +1202,7 @@ def parse_model(d, ch, verbose=True, warehouse_manager=None):  # model_dict, inp
             c1 = [ch[x] for x in f]
             c2 = int(c1[1] * 0.5 * 3)
             args = [c1, *args]
-        elif m is DASI:
+        elif m is MRFN:
             c1 = [ch[x] for x in f]
             args = [c1, c2]
         elif m is CSMHSA:

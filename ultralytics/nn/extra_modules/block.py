@@ -50,7 +50,7 @@ __all__ = ['DyHeadBlock', 'DyHeadBlockWithDCNV3', 'Fusion', 'C2f_Faster', 'C3_Fa
            'DGCST', 'C3_RetBlock', 'C2f_RetBlock', 'ELA_HSFPN', 'CA_HSFPN', 'CAA_HSFPN', 'C3_PKIModule', 'C2f_PKIModule', 'RepNCSPELAN4_CAA', 'FocusFeature', 'C3_FADC', 'C2f_FADC',
            'C3_PPA', 'C2f_PPA', 'CSMHSA', 'SRFD', 'DRFD', 'CFC_CRB', 'SFC_G2', 'CGAFusion', 'CAFM', 'CAFMFusion', 'RGCSPELAN', 'C3_Faster_CGLU', 'C2f_Faster_CGLU', 'SDFM', 'PSFM',
            'C3_Star', 'C2f_Star', 'C3_Star_CAA', 'C2f_Star_CAA', 'C3_KAN', 'C2f_KAN', 'EIEStem', 'C3_EIEM', 'C2f_EIEM', 'ContextGuideFusionModule', 'C3_DEConv', 'C2f_DEConv',
-           'C3_SMPCGLU', 'C2f_SMPCGLU', 'C3_Heat', 'C2f_Heat', 'SBA', 'WaveletPool', 'WaveletUnPool', 'CSP_PTB', 'GLSA', 'CSPOmniKernel', 'WTConv2d', 'C2f_WTConv',
+           'C3_SMPCGLU', 'DPS_CGLU', 'C3_Heat', 'C2f_Heat', 'SBA', 'WaveletPool', 'WaveletUnPool', 'CSP_PTB', 'GLSA', 'CSPOmniKernel', 'WTConv2d', 'C2f_WTConv',
            'RCM', 'PyramidContextExtraction', 'DynamicInterpolationFusion', 'FuseBlockMulti', 'FeaturePyramidSharedConv', 'C2f_FMB', 'LDConv', 'C2f_gConv', 'C2f_WDBB', 'C2f_DeepDBB',
            'C2f_AdditiveBlock', 'C2f_AdditiveBlock_CGLU', 'CSP_MSCB', 'EUCB', 'C2f_MSMHSA_CGLU', 'CSP_PMSFA']
 
@@ -6139,7 +6139,7 @@ class C3_SMPCGLU(C3):
         c_ = int(c2 * e)  # hidden channels
         self.m = nn.Sequential(*(SMPCGLU(c_, kernel_size) for _ in range(n)))
 
-class C2f_SMPCGLU(C2f):
+class DPS_CGLU(C2f):
     def __init__(self, c1, c2, n=1, kernel_size=13, shortcut=False, g=1, e=0.5):
         super().__init__(c1, c2, n, shortcut, g, e)
         self.m = nn.ModuleList(SMPCGLU(self.c, kernel_size) for _ in range(n))

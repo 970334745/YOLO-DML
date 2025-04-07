@@ -49,4 +49,4 @@ head:
 
   - [17, 1, Conv, [512, 1]] # 24
 
-  - [[23, 24, 20], 1, Detect_TADDH, [nc, 512]]  # Detect(P3, P4, P5)
+  - [[23, 24, 20], 1, LATAN, [nc, 512]]  # Detect(P3, P4, P5)

@@ -16,7 +16,7 @@ from ultralytics.utils.tal import dist2bbox, make_anchors, dist2rbox
 # from ultralytics.utils.ops import nmsfree_postprocess
 
 __all__ = ['Detect_DyHead', 'Detect_DyHeadWithDCNV3', 'Detect_DyHeadWithDCNV4', 'Detect_AFPN_P345', 'Detect_AFPN_P345_Custom', 'Detect_AFPN_P2345', 'Detect_AFPN_P2345_Custom', 'Detect_Efficient', 'DetectAux',
-           'Segment_Efficient', 'Detect_SEAM', 'Detect_MultiSEAM', 'Detect_DyHead_Prune', 'Detect_LSCD', 'Segment_LSCD', 'Pose_LSCD', 'OBB_LSCD', 'Detect_TADDH', 'Segment_TADDH', 'Pose_TADDH', 'OBB_TADDH',
+           'Segment_Efficient', 'Detect_SEAM', 'Detect_MultiSEAM', 'Detect_DyHead_Prune', 'Detect_LSCD', 'Segment_LSCD', 'Pose_LSCD', 'OBB_LSCD', 'LATAN', 'Segment_TADDH', 'Pose_TADDH', 'OBB_TADDH',
            'Detect_LADH', 'Segment_LADH', 'Pose_LADH', 'OBB_LADH', 'Detect_LSCSBD', 'Segment_LSCSBD', 'Pose_LSCSBD', 'OBB_LSCSBD', 'Detect_LSDECD', 'Segment_LSDECD', 'Pose_LSDECD', 'OBB_LSDECD', 'Detect_NMSFree',
            'v10Detect_LSCD']
 
@@ -710,7 +710,7 @@ class TaskDecomposition(nn.Module):
 
         return feat
 
-class Detect_TADDH(nn.Module):
+class LATAN(nn.Module):
     # Task Dynamic Align Detection Head
     """YOLOv8 Detect head for detection models."""
 
@@ -805,7 +805,7 @@ class Detect_TADDH(nn.Module):
         """Decode bounding boxes."""
         return dist2bbox(self.dfl(bboxes), self.anchors.unsqueeze(0), xywh=True, dim=1) * self.strides
 
-class Segment_TADDH(Detect_TADDH):
+class Segment_TADDH(LATAN):
     """YOLOv8 Segment head for segmentation models."""
 
     def __init__(self, nc=80, nm=32, npr=256, hidc=256, ch=()):
@@ -814,7 +814,7 @@ class Segment_TADDH(Detect_TADDH):
         self.nm = nm  # number of masks
         self.npr = npr  # number of protos
         self.proto = Proto(ch[0], self.npr, self.nm)  # protos
-        self.detect = Detect_TADDH.forward
+        self.detect = LATAN.forward
 
         c4 = max(ch[0] // 4, self.nm)
         self.cv4 = nn.ModuleList(nn.Sequential(Conv_GN(x, c4, 1), Conv_GN(c4, c4, 3), nn.Conv2d(c4, self.nm, 1)) for x in ch)
@@ -830,7 +830,7 @@ class Segment_TADDH(Detect_TADDH):
             return x, mc, p
         return (torch.cat([x, mc], 1), p) if self.export else (torch.cat([x[0], mc], 1), (x[1], mc, p))
 
-class Pose_TADDH(Detect_TADDH):
+class Pose_TADDH(LATAN):
     """YOLOv8 Pose head for keypoints models."""
 
     def __init__(self, nc=80, kpt_shape=(17, 3), hidc=256, ch=()):
@@ -838,7 +838,7 @@ class Pose_TADDH(Detect_TADDH):
         super().__init__(nc, hidc, ch)
         self.kpt_shape = kpt_shape  # number of keypoints, number of dims (2 for x,y or 3 for x,y,visible)
         self.nk = kpt_shape[0] * kpt_shape[1]  # number of keypoints total
-        self.detect = Detect_TADDH.forward
+        self.detect = LATAN.forward
 
         c4 = max(ch[0] // 4, self.nk)
         self.cv4 = nn.ModuleList(nn.Sequential(Conv(x, c4, 1), Conv(c4, c4, 3), nn.Conv2d(c4, self.nk, 1)) for x in ch)
@@ -870,14 +870,14 @@ class Pose_TADDH(Detect_TADDH):
             y[:, 1::ndim] = (y[:, 1::ndim] * 2.0 + (self.anchors[1] - 0.5)) * self.strides
             return y
 
-class OBB_TADDH(Detect_TADDH):
+class OBB_TADDH(LATAN):
     """YOLOv8 OBB detection head for detection with rotation models."""
 
     def __init__(self, nc=80, ne=1, hidc=256, ch=()):
         """Initialize OBB with number of classes `nc` and layer channels `ch`."""
         super().__init__(nc, hidc, ch)
         self.ne = ne  # number of extra parameters
-        self.detect = Detect_TADDH.forward
+        self.detect = LATAN.forward
 
         c4 = max(ch[0] // 4, self.ne)
         self.cv4 = nn.ModuleList(nn.Sequential(Conv_GN(x, c4, 1), Conv_GN(c4, c4, 3), nn.Conv2d(c4, self.ne, 1)) for x in ch)
